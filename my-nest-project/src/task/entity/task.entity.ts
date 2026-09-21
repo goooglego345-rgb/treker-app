@@ -1,4 +1,5 @@
-import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {User} from "./user.entity";
 
 
 @Entity('tasks')
@@ -11,4 +12,10 @@ export class Task {
 
     @Column({default: true})
     isFuture: boolean;
+
+   @ManyToOne(() => User, (user) => user.task,{onDelete: 'CASCADE'})
+    user:User;
+
+   @Column()
+   userId: number;
 }

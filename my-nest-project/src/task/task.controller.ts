@@ -1,41 +1,30 @@
-import {Body, Controller, Delete, Get, Param, Post,Patch} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
 import { TaskService } from './task.service';
-import {InjectRepository} from "@nestjs/typeorm";
-import {Task} from "./entity/task.entity";
-import {DeleteResult, Repository, UpdateResult} from "typeorm";
-import {TaskDto} from "./dto/task.dto";
-import {AppModule} from "../app.module";
-import {isBoolean, IsNumber} from "class-validator";
+import { AuthGuard } from '../auth/auth.guard'; // Шлях до Охоронця
 
-
-
-@Controller('/api/tasks')
+@UseGuards(AuthGuard) // ЗАХИЩАЄМО ВСІ МАРШРУТИ ЗАДАЧ
+@Controller('tasks')
 export class TaskController {
-    constructor(
-        @InjectRepository(Task)
-        private tasksRepository: Repository<Task>,
+    constructor(private readonly taskService: TaskService) {}
 
-    ){}
     @Get()
-    async getTasks(): Promise<Task[]>{
-        return await this.tasksRepository.find();
+    getAllTasks(@Request() req) {
+        // req.user.sub - це ID юзера, який зараз користується додатком
+        return this.taskService.findAllByUserId(req.user.sub);
     }
+
     @Post()
-    async createTask(@Body() body : {title: string}): Promise<Task>  {
-        const newTasks = this.tasksRepository.create({title: body.title, isFuture: true});
-         return await this.tasksRepository.save(newTasks);
+    createTask(@Body('title') title: string, @Request() req) {
+        return this.taskService.create(title, req.user.sub);
     }
+
     @Delete(':id')
-    async deleteTask(@Param('id') id: number) : Promise<DeleteResult>  {
-        return await this.tasksRepository.delete(id);
+    deleteTask(@Param('id') id: string, @Request() req) {
+        return this.taskService.delete(Number(id), req.user.sub);
     }
-    @Patch(':id')
-    async updateTask(@Param('id') id: string){
-     const task = await this.tasksRepository.findOneBy({id:parseInt(id) });
-     if (task) {
-         task.isFuture = !task.isFuture;
-         await this.tasksRepository.save(task);
-     }
-     return {updated: false};
-}
+
+    @Patch(':id/toggle')
+    toggleTask(@Param('id') id: string, @Request() req) {
+        return this.taskService.toggle(Number(id), req.user.sub);
+    }
 }
