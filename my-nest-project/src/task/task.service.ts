@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {FindOptions, FindOptionsWhere, Repository} from 'typeorm';
 import { Task } from './entity/task.entity';
+import {ObservedValueOf} from "rxjs";
 
 @Injectable()
 export class TaskService {
@@ -30,7 +31,8 @@ export class TaskService {
     }
 
     async toggle(id: number, userId: number) {
-        const task = await this.taskRepository.findOne({ where: { id, userId } });
+        const task = await this.taskRepository.findOne({ where: { id, userId} });
+
         if (!task) {
             throw new NotFoundException('Задачу не знайдено (або це чужа задача)');
         }

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { AuthGuard } from '../auth/auth.guard'; // Шлях до Охоронця
+import { AuthGuard } from '../auth/auth.guard';
 
 @UseGuards(AuthGuard) // ЗАХИЩАЄМО ВСІ МАРШРУТИ ЗАДАЧ
 @Controller('tasks')
@@ -24,7 +24,7 @@ export class TaskController {
     }
 
     @Patch(':id/toggle')
-    toggleTask(@Param('id') id: string, @Request() req) {
+    toggleTask(@Param('id') id: string, isFuture : boolean, @Request() req) {
         return this.taskService.toggle(Number(id), req.user.sub);
     }
 }

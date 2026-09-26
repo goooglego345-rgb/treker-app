@@ -3,13 +3,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TaskModule } from './task/task.module';
 import {TaskController} from "./task/task.controller";
-import {TypeOrmModule} from "@nestjs/typeorm";
+import {TypeOrmModule,} from "@nestjs/typeorm";
 import {Task} from "./task/entity/task.entity";
 import {AuthModule, jwtConstants} from './auth/auth.module';
 import {AuthController} from "./auth/auth.controller";
 import {User} from "./task/entity/user.entity";
 import {AuthService} from "./auth/auth.service";
 import {JwtModule} from "@nestjs/jwt";
+import { TimeModule } from './time/time.module';
+import {DataSource, DataSourceOptions} from "typeorm";
 
 @Module({
   imports: [
@@ -30,7 +32,8 @@ import {JwtModule} from "@nestjs/jwt";
           global: true,
           secret: 'vorona-gey',
           signOptions: { expiresIn: '1d' },
-      })
+      }),
+      TimeModule
   ],
   controllers: [AppController],
   providers: [AppService],
