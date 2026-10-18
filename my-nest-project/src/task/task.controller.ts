@@ -1,11 +1,13 @@
 import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { AuthGuard } from '../auth/auth.guard';
+import {TimeService} from "../time/time.service";
 
 @UseGuards(AuthGuard) // ЗАХИЩАЄМО ВСІ МАРШРУТИ ЗАДАЧ
 @Controller('tasks')
 export class TaskController {
-    constructor(private readonly taskService: TaskService) {}
+    constructor(private readonly taskService: TaskService) {
+    }
 
     @Get()
     getAllTasks(@Request() req) {
@@ -14,8 +16,10 @@ export class TaskController {
     }
 
     @Post()
-    createTask(@Body('title') title: string, @Request() req) {
-        return this.taskService.create(title, req.user.sub);
+    createTask(@Body('title') title: string,
+               @Body('targetTime') targetTime: string, // <-- 1. ДОДАЙ витягування часу з JSON
+               @Request() req) {
+        return this.taskService.create(title, req.user.sub,targetTime);
     }
 
     @Delete(':id')
@@ -24,7 +28,7 @@ export class TaskController {
     }
 
     @Patch(':id/toggle')
-    toggleTask(@Param('id') id: string, isFuture : boolean, @Request() req) {
+    toggleTask(@Param('id') id: string, isFuture: boolean, @Request() req) {
         return this.taskService.toggle(Number(id), req.user.sub);
     }
 }

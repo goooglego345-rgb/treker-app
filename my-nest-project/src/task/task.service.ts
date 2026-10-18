@@ -1,14 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {FindOptions, FindOptionsWhere, Repository} from 'typeorm';
+import {DeepPartial, FindOptions, FindOptionsWhere, Repository} from 'typeorm';
 import { Task } from './entity/task.entity';
+
 import {ObservedValueOf} from "rxjs";
+import {getRawAsset} from "node:sea";
+import {Time} from "./entity/time.entity";
 
 @Injectable()
 export class TaskService {
     constructor(
         @InjectRepository(Task)
         private taskRepository: Repository<Task>,
+        @InjectRepository(Time)
+        private timeRepository: Repository<Time>,
     ) {}
 
     findAllByUserId(userId: number) {
@@ -16,11 +21,20 @@ export class TaskService {
         return this.taskRepository.find({ where: { userId } });
     }
 
-    create(title: string, userId: number) {
-        // ПРИВ'ЯЗУЄМО ЗАДАЧУ ДО ЮЗЕРА ПРИ СТВОРЕННІ
+    async create(title: string, userId: number, targetTime: string) {
         const newTask = this.taskRepository.create({ title, userId });
-        return this.taskRepository.save(newTask);
-    }
+        const savedTask = await this.taskRepository.save(newTask)
+        if(targetTime && targetTime.trim()!= ''){
+            const newTime =  this.timeRepository.create({
+                title:title,
+                targetTime:targetTime,
+                task: savedTask
+            });
+             await this.timeRepository.save(newTime);
+        }
+        return savedTask;
+    };
+
 
     async delete(id: number, userId: number) {
         // ВИДАЛИТЬ ТІЛЬКИ ЯКЩО ЗБІГАЄТЬСЯ І ID ЗАДАЧІ І ID ЮЗЕРА

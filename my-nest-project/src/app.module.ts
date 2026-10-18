@@ -12,6 +12,8 @@ import {AuthService} from "./auth/auth.service";
 import {JwtModule} from "@nestjs/jwt";
 import { TimeModule } from './time/time.module';
 import {DataSource, DataSourceOptions} from "typeorm";
+import {Cron, ScheduleModule} from "@nestjs/schedule";
+import {Time} from "./task/entity/time.entity";
 
 @Module({
   imports: [
@@ -22,9 +24,10 @@ import {DataSource, DataSourceOptions} from "typeorm";
         username: 'postgres',
         password: '123',
         database: 'postgres',
-        entities: [Task, User],
+        entities: [Task, User, Time],
         synchronize: true,
       }),
+      ScheduleModule.forRoot({}),
       TypeOrmModule.forFeature([Task]),
       AuthModule,
       TaskModule,
@@ -34,6 +37,7 @@ import {DataSource, DataSourceOptions} from "typeorm";
           signOptions: { expiresIn: '1d' },
       }),
       TimeModule
+
   ],
   controllers: [AppController],
   providers: [AppService],
